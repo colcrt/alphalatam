@@ -1,0 +1,151 @@
+<?php
+declare(strict_types=1);
+
+$tipos = [
+    '' => 'Todos',
+    'noticia' => 'Noticias',
+    'opinion' => 'Opinión',
+    'investigacion' => 'Investigaciones',
+];
+
+$tipoBadgeMap = [
+    'noticia' => 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+    'opinion' => 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+    'investigacion' => 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
+];
+
+$tipoLabelMap = [
+    'noticia' => 'Noticia',
+    'opinion' => 'Opinión',
+    'investigacion' => 'Investigación',
+];
+
+ob_start();
+?>
+
+<!-- Header -->
+<section class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">Blog</h1>
+
+        <!-- Filter pills -->
+        <div class="flex flex-wrap gap-2">
+            <?php foreach ($tipos as $key => $label): ?>
+            <?php
+                $isActive = ($tipoActual ?? null) === $key || (!$tipoActual && $key === '');
+                $activeClass = $isActive
+                    ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-600 hover:text-brand-600 dark:hover:text-brand-400';
+            ?>
+            <a href="<?= esc(url('/blog') . ($key ? '?tipo=' . $key : '')) ?>"
+               class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 <?= $activeClass ?>">
+                <?= esc($label) ?>
+            </a>
+            <?php endforeach; ?>
+        </div>
+
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-3"><?= $paginator['total'] ?> artículos</p>
+    </div>
+</section>
+
+<!-- Content -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <?php if (empty($paginator['data'])): ?>
+    <div class="text-center py-16">
+        <i data-lucide="file-text" class="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4"></i>
+        <h2 class="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-1">No hay artículos</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400">No hay artículos publicados en esta categoría.</p>
+    </div>
+    <?php else: ?>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <?php foreach ($paginator['data'] as $post): ?>
+        <?php
+            $tipo = $post->tipo ?? '';
+            $badge = $tipoBadgeMap[$tipo] ?? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+            $label = $tipoLabelMap[$tipo] ?? ucfirst($tipo);
+        ?>
+        <article class="group bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+            <a href="<?= esc(route('blog.show', ['slug' => $post->slug])) ?>" class="block">
+                <?php if (!empty($post->imagen_destacada_path)): ?>
+                <img src="<?= esc(asset('uploads/' . $post->imagen_destacada_path)) ?>"
+                     alt="<?= esc($post->titulo) ?>"
+                     width="400" height="192"
+                     loading="lazy" decoding="async"
+                     class="w-full h-48 object-cover">
+                <?php else: ?>
+                <div class="w-full h-48 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center">
+                    <i data-lucide="file-text" class="w-10 h-10 text-slate-300 dark:text-slate-600"></i>
+                </div>
+                <?php endif; ?>
+
+                <div class="p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold <?= $badge ?>"><?= esc($label) ?></span>
+                        <?php if (!empty($post->categoria_nombre)): ?>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"><?= esc($post->categoria_nombre) ?></span>
+                        <?php endif; ?>
+                    </div>
+
+                    <h2 class="text-base font-bold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors leading-snug">
+                        <?= esc($post->titulo) ?>
+                    </h2>
+
+                    <?php if (!empty($post->extracto)): ?>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-4"><?= esc(str_limit($post->extracto, 120)) ?></p>
+                    <?php endif; ?>
+
+                    <div class="flex items-center text-xs text-slate-400 dark:text-slate-500">
+                        <?php if (!empty($post->autor_nombre)): ?>
+                        <span class="inline-flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5"></i> <?= esc($post->autor_nombre) ?></span>
+                        <?php endif; ?>
+                        <?php if (!empty($post->published_at)): ?>
+                        <span class="inline-flex items-center gap-1 ml-auto"><i data-lucide="calendar-days" class="w-3.5 h-3.5"></i> <?= esc(date_format_es($post->published_at)) ?></span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </a>
+        </article>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- Pagination -->
+    <?php if ($paginator['has_pages']): ?>
+    <nav aria-label="Paginación" class="mt-10">
+        <ul class="flex items-center justify-center gap-1.5">
+            <li class="<?= $paginator['current_page'] <= 1 ? 'pointer-events-none opacity-40' : '' ?>">
+                <a href="<?= esc(url('/blog') . ($tipoActual ? '?tipo=' . $tipoActual . '&' : '?') . 'page=' . ($paginator['current_page'] - 1)) ?>"
+                   class="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i> Anterior
+                </a>
+            </li>
+            <?php for ($i = 1; $i <= $paginator['last_page']; $i++): ?>
+            <li>
+                <a href="<?= esc(url('/blog') . ($tipoActual ? '?tipo=' . $tipoActual . '&' : '?') . 'page=' . $i) ?>"
+                   class="inline-flex items-center justify-center w-10 h-10 text-sm font-medium rounded-lg transition-colors <?= $i === $paginator['current_page'] ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25' : 'border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800' ?>">
+                    <?= $i ?>
+                </a>
+            </li>
+            <?php endfor; ?>
+            <li class="<?= !$paginator['has_more_pages'] ? 'pointer-events-none opacity-40' : '' ?>">
+                <a href="<?= esc(url('/blog') . ($tipoActual ? '?tipo=' . $tipoActual . '&' : '?') . 'page=' . ($paginator['current_page'] + 1)) ?>"
+                   class="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    Siguiente <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <?php endif; ?>
+</div>
+
+<?php
+$content = ob_get_clean();
+
+\App\Core\View::renderLayout('public', $content, [
+    'pageTitle' => 'Blog',
+    'metaDescription' => 'Noticias, artículos de opinión e investigaciones sobre corrupción.',
+    'breadcrumbs' => [
+        ['nombre' => 'Inicio', 'url' => url('/')],
+        ['nombre' => 'Blog', 'url' => null],
+    ],
+]);

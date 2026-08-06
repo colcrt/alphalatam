@@ -1,0 +1,29 @@
+# AlphaLatam
+
+Custom PHP framework (no Laravel) en alphalatam.click. MySQL + PDO, Tailwind CSS, Vue 3 SPA admin.
+
+## Stack
+- PHP 8.1+, PSR-4 (App\ -> src/)
+- Tailwind CSS v3.4 (compilado, npm run build)
+- Vue 3 (CDN) + Quill.js en admin
+- MySQL via PDO, ORM propio (src/Database/Model.php)
+- Sin tests, sin static analysis
+
+## Estructura
+- src/ -> todo el código
+- templates/ -> PHP plano (sin Blade)
+- routes/web.php -> todas las rutas
+- config/ -> app, database, filesystems, services
+- migrations/ -> 2 SQL plano
+
+## Módulos implementados
+- Blog (completo: CRUD, categorías, comentarios)
+- Noticia, PartidoPolitico (Model + Service + Repository)
+- Contrato, Fuente (Service/Repository parcial)
+- Persona, Caso, Empresa, Institucion, Sentencia (solo DTOs + admin controllers)
+
+## Comandos
+npm install / npm run build / php -f scripts/cron-backup.php
+
+## Gaps conocidos
+No .env.example, no tests, sitemap sin caché, credenciales en .env commiteado

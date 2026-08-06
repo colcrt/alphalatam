@@ -1,0 +1,12 @@
+{
+  "name": "blog-corrupcion",
+  "private": true,
+  "scripts": {
+    "build:public": "npx tailwindcss -i assets/css/tailwind-public-source.css -o assets/css/tailwind-public.css --minify",
+    "build:admin": "npx tailwindcss -c tailwind-admin.config.js -i assets/css/tailwind-admin-source.css -o assets/css/tailwind-admin.css --minify",
+    "build": "npm run build:public && npm run build:admin"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

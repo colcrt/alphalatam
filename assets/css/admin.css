@@ -1,0 +1,355 @@
+/* ============================================
+   Admin Panel — Tailwind CSS complement
+   Solo estilos para Quill WYSIWYG editor
+   ============================================ */
+
+/* --- Quill WYSIWYG Editor --- */
+.quill-wrapper {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    background: #fff;
+    overflow: hidden;
+}
+
+.dark .quill-wrapper {
+    border-color: #334155;
+    background: #1e293b;
+}
+
+.quill-wrapper.is-invalid {
+    border-color: #ef4444;
+}
+
+.quill-wrapper .ql-toolbar {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 0.75rem 0.75rem 0 0;
+    background: #f8fafc;
+    padding: 0.5rem 0.75rem;
+}
+
+.dark .quill-wrapper .ql-toolbar {
+    border-bottom-color: #334155;
+    background: #0f172a;
+}
+
+.quill-wrapper .ql-container {
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    min-height: 300px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.95rem;
+}
+
+.quill-wrapper .ql-editor {
+    min-height: 300px;
+    padding: 1rem;
+    color: #1e293b;
+    line-height: 1.7;
+}
+
+.dark .quill-wrapper .ql-editor {
+    color: #e2e8f0;
+}
+
+.quill-wrapper .ql-editor.ql-blank::before {
+    color: #94a3b8;
+    font-style: normal;
+}
+
+/* Quill toolbar icons override for dark mode */
+.dark .quill-toolbar .ql-stroke {
+    stroke: #94a3b8;
+}
+
+.dark .quill-toolbar .ql-fill {
+    fill: #94a3b8;
+}
+
+.dark .quill-toolbar .ql-picker-label {
+    color: #94a3b8;
+}
+
+/* --- Quill editor embed preview --- */
+.ql-editor .embed-wrapper {
+    position: relative;
+    margin: 1rem 0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    padding: 0;
+    min-height: 80px;
+}
+
+.dark .ql-editor .embed-wrapper {
+    border-color: #334155;
+    background: #0f172a;
+}
+
+.ql-editor .embed-wrapper iframe {
+    width: 100%;
+    min-height: 300px;
+    border: none;
+    border-radius: 0.75rem;
+}
+
+/* --- Twitter/X syndication card --- */
+.tweet-card {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    max-width: 550px;
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 12px 16px;
+    background: #fff;
+}
+
+.dark .tweet-card {
+    border-color: #333639;
+    background: #000;
+}
+
+.tweet-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.tweet-card-link:hover {
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 12px;
+}
+
+.dark .tweet-card-link:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.tweet-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.tweet-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.tweet-author {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.tweet-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: #0f1419;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dark .tweet-name {
+    color: #e7e9ea;
+}
+
+.tweet-screen {
+    font-size: 15px;
+    color: #536471;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dark .tweet-screen {
+    color: #71767b;
+}
+
+.tweet-logo {
+    color: #1d9bf0;
+    flex-shrink: 0;
+}
+
+.tweet-text {
+    font-size: 15px;
+    line-height: 1.4;
+    color: #0f1419;
+    margin: 0 0 12px 0;
+    word-wrap: break-word;
+}
+
+.dark .tweet-text {
+    color: #e7e9ea;
+}
+
+.tweet-text a {
+    color: #1d9bf0;
+    text-decoration: none;
+}
+
+.tweet-text a:hover {
+    text-decoration: underline;
+}
+
+.tweet-media {
+    margin-bottom: 12px;
+}
+
+.tweet-photos {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.tweet-photos img {
+    width: 100%;
+    display: block;
+}
+
+.tweet-photos--single img {
+    max-height: 510px;
+    object-fit: cover;
+}
+
+.tweet-photos--double {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+}
+
+.tweet-photos--double img {
+    height: 100%;
+    object-fit: cover;
+}
+
+.tweet-photos--grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 2px;
+}
+
+.tweet-photos--grid img:first-child {
+    grid-row: 1 / -1;
+}
+
+.tweet-video video {
+    width: 100%;
+    border-radius: 12px;
+    display: block;
+}
+
+.tweet-quote {
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    text-decoration: none;
+    display: block;
+}
+
+.dark .tweet-quote {
+    border-color: #333639;
+}
+
+.tweet-quote:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.dark .tweet-quote:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.tweet-quote-header {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.tweet-quote-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: #0f1419;
+}
+
+.dark .tweet-quote-name {
+    color: #e7e9ea;
+}
+
+.tweet-quote-screen {
+    font-size: 13px;
+    color: #536471;
+}
+
+.dark .tweet-quote-screen {
+    color: #71767b;
+}
+
+.tweet-quote-text {
+    font-size: 14px;
+    line-height: 1.3;
+    color: #0f1419;
+    margin: 0;
+}
+
+.dark .tweet-quote-text {
+    color: #e7e9ea;
+}
+
+.tweet-footer {
+    display: flex;
+    gap: 4px;
+    font-size: 13px;
+    color: #536471;
+    padding-top: 8px;
+    border-top: 1px solid #eff3f4;
+}
+
+.dark .tweet-footer {
+    color: #71767b;
+    border-top-color: #2f3336;
+}
+
+.tweet-via {
+    margin-left: auto;
+}
+
+/* --- Embed modal preview container --- */
+.embed-preview-container {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.embed-preview-container iframe {
+    width: 100%;
+    min-height: 250px;
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.embed-preview-container .embed-wrapper {
+    margin: 0;
+    border: none;
+    background: transparent;
+}
+
+/* --- Vue cloak --- */
+[v-cloak] { display: none !important; }
+
+/* --- Focus visible ring for accessibility --- */
+*:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #3b82f6;
+}
+
+/* --- Evitar scroll horizontal por contenido que se desborda --- */
+body {
+    overflow-x: hidden;
+}
