@@ -1,59 +1,69 @@
-# Plataforma Documental — Núcleo del sistema
+# AlphaLatam — Blog de Corrupción
 
-Implementación del núcleo funcional descrito en el documento de arquitectura,
-siguiendo el patrón completo **Repository → Service → Policy → Livewire → Vista pública → SEO**
-para los módulos bandera (**Persona**, **Caso**, **Fuente/Documento**, **Blog**, **Buscador**),
-con el resto de módulos (Institución, Partido, Empresa, Contrato, Sentencia, Noticia)
-modelados en la base de datos y listos para replicar el mismo patrón mecánicamente.
+Plataforma de periodismo y documentación ciudadana dedicada a investigar, registrar y
+denunciar casos de corrupción en América Latina. Desarrollada por **colcrt** (2025–2026).
 
-## ⚠️ Importante sobre este entregable
+## ¿De qué trata el proyecto?
 
-Este código se escribió a mano siguiendo estrictamente las convenciones de Laravel 11
-y Livewire 3, pero **no se ejecutó ni se probó en un entorno real** porque el entorno
-en el que fue generado no tiene acceso a Packagist/Composer. Antes de usarlo en producción:
+AlphaLatam es un medio digital independiente que combina un blog de investigación con
+herramientas de participación ciudadana. Permite publicar artículos e investigaciones,
+mantener un repositorio de fuentes documentales, buscar contenido histórico mediante
+búsqueda de texto completo y recibir denuncias anónimas de la comunidad. El panel de
+administración está pensado para que el equipo editorial redacte, revise y publique
+contenido verificable y con trazabilidad de fuentes.
 
-1. Instálalo sobre un proyecto Laravel 11 real (`composer create-project laravel/laravel`).
-2. Copia estos archivos respetando la misma estructura de carpetas.
-3. Ejecuta `composer install`, configura `.env`, corre `php artisan migrate`.
-4. Corre `php artisan test` y revisa con `vendor/bin/pint` antes de desplegar.
+## Tecnologías
 
-## Qué está completo
-
-- **Base de datos**: 15 migraciones, ~35 tablas, completamente normalizada, con
-  índices FULLTEXT, pivotes con metadatos, y relaciones polimórficas para
-  Fuentes/Documentos/Etiquetas.
-- **Modelos Eloquent**: los 21 modelos con todas sus relaciones (`BelongsToMany`
-  con pivote, `MorphToMany`, `MorphMany`), traits compartidos (`HasSeo`,
-  `HasEstadoPublicacion`).
-- **Patrón completo para Persona** (módulo bandera, replicar para el resto):
-  - `PersonaRepositoryInterface` + `EloquentPersonaRepository`
-  - `PersonaService` con las reglas de negocio (no publicar sin fuente,
-    versionado automático de estado judicial)
-  - `PersonaPolicy` + binding en `AuthServiceProvider`
-  - `PersonaData` (DTO) + `EstadoJudicial` (Enum)
-  - 3 componentes Livewire admin (`PersonaIndex`, `PersonaTable`, `PersonaForm`)
-  - Vista pública SSR con SEO, cronología de estado judicial, y relaciones
-  - `PersonaObserver` (auditoría + invalidación de caché automática)
-  - `ProcesarImagenPersona` Job (conversión a WebP asíncrona)
-- **Transversales**: `SeoService` (JSON-LD, meta tags), `BusquedaService`
-  (buscador global FULLTEXT), `EstadisticasService` (dashboard cacheado),
-  `GenerarSitemap` Command, layouts público/admin con modo oscuro,
-  componentes `<x-seo-meta>` y `<x-breadcrumbs>`.
-- **Blog**: modelos completos + controller público + Livewire admin básico.
-
-## Qué falta (siguiente iteración, mecánico)
-
-Replicar exactamente el patrón de Persona para: Caso, Institución, Partido
-Político, Empresa, Contrato, Sentencia, Noticia, Fuente. Cada uno necesita:
-Repository (interfaz + Eloquent), Service, Policy, 3 componentes Livewire
-admin, vista pública, Observer. El modelo de datos y las rutas ya están
-listos para recibirlos.
-
-También pendiente: FormRequests explícitos si se prefiere validación fuera
-de Livewire, `routes/api.php` (Fase 10), 2FA en el login de Breeze,
-sistema de backups programado, y tests Feature/Unit.
+- **PHP 8.1+** — framework propio (núcleo en `src/Core/`), sin Laravel, Livewire ni Blade.
+- **MySQL** a través de **PDO** con capa propia: `Connection`, `QueryBuilder` y un ORM
+  ligero (`App\Database\Model`) con casts, soft deletes, relaciones y observadores.
+- **Tailwind CSS 3.4** — compilado con dark mode (`class`), dos builds (público y admin).
+- **Vue 3** (CDN UMD) + **Quill.js** — SPA de administración en `assets/js/admin/app.js`.
+- **Lucide icons** y **Chart.js** para la interfaz y estadísticas.
+- **Patrón Repository → Service** con DTOs (`final readonly class`) y Enums con etiquetas.
+- **Seguridad**: bcrypt (cost 12), sesiones con CSRF, 2FA TOTP con códigos de respaldo,
+  roles (admin, editor, revisor, auditor), sanitización de HTML y soft deletes.
+- **SEO**: meta tags, JSON-LD, sitemap XML dinámico y URLs amigables (slugs).
+- **Búsqueda** FULLTEXT de MySQL y resolución **oEmbed** (YouTube, X, TikTok, etc.).
 
 ## Estructura
 
-Ver árbol de carpetas en el documento de arquitectura entregado previamente
-(`arquitectura-plataforma.md`) — esta implementación lo sigue exactamente.
+    src/Core/          Router, Request/Response, View, Validator, Session, Cache, Auth
+    src/Database/      Conexión PDO, QueryBuilder, Model (ORM propio)
+    src/Domain/        DTOs y Enums por módulo (Caso, Contrato, Fuente, Noticia, Persona…)
+    src/Repositories/  Contratos + implementaciones (patrón Repository)
+    src/Services/      Lógica de negocio (Blog, Busqueda, SEO, 2FA, Noticias, Partidos…)
+    src/Http/          Controllers públicos, admin y API JSON (usada por el SPA Vue)
+    src/Observers/     Auditoría y limpieza de caché
+    templates/         Vistas en PHP puro (layouts, público, admin, auth)
+    routes/web.php     Todas las rutas de la aplicación
+    migrations/        Esquema SQL de MySQL
+    assets/            CSS compilado y JS (SPA Vue)
+    scripts/           cron-backup.php (dump + limpieza)
+
+## Módulos
+
+- **Blog** (completo): artículos, categorías, comentarios, versionado y SEO.
+- **Noticias, Partidos Políticos** con repositorio y servicio (regla: no publicar sin fuente).
+- **Fuentes** — repositorio documental para respaldar las publicaciones.
+- Persona, Caso, Empresa, Institución, Sentencia, Contrato (DTOs y administración).
+- **Extras**: buscador global, denuncias ciudadanas, encuesta/reto de la comunidad,
+  boletín/suscriptores y bloqueo 2FA.
+
+## Despliegue
+
+En producción se ejecuta sobre un hosting compartido con MySQL, accesible en
+**https://alphalatam.click/**. No requiere Node en el servidor: el CSS ya está
+compilado y el front se sirve por CDN.
+
+## Comandos
+
+    npm install            # Instala Tailwind (dev)
+    npm run build          # Compila el CSS público y de admin
+    php -f scripts/cron-backup.php   # Backup manual de la BD
+
+## Autor y derechos
+
+© **colcrt** — Todos los derechos reservados. Este proyecto es de autoría exclusiva de
+**colcrt**. **Está prohibida la reproducción, distribución o uso total o parcial** de este
+código, su diseño o su contenido sin autorización expresa y por escrito del autor..
