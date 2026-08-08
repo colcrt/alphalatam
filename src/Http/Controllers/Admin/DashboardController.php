@@ -13,6 +13,7 @@ use App\Core\View;
 use App\Database\Connection;
 use App\Services\ConfiguracionService;
 use App\Services\EstadisticasService;
+use App\Services\BlogService;
 
 class DashboardController
 {
@@ -26,6 +27,11 @@ class DashboardController
 
         if ($role === 'admin') {
             $stats = $estadisticas->resumen();
+            try {
+                $stats['solicitudes_borrado'] = App::make(BlogService::class)->contarSolicitudesBorrado();
+            } catch (\Throwable $e) {
+                $stats['solicitudes_borrado'] = 0;
+            }
         } elseif ($role === 'editor') {
             $base = Connection::table('blog_posts')
                 ->where('autor_id', $user->id)

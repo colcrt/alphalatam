@@ -30,7 +30,7 @@ $_isLoggedIn = Auth::check();
 	<title><?= esc($pageTitle ?? 'AlphaLatam') ?></title>
 
     <!-- Tailwind CSS (pre-compiled) -->
-    <link rel="stylesheet" href="<?= asset('assets/css/tailwind-public.css') ?>?v=20260726">
+    <link rel="stylesheet" href="<?= asset('assets/css/tailwind-public.css') ?>?v=20260807">
 
     <!-- Google Fonts (non-blocking) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,7 +39,7 @@ $_isLoggedIn = Auth::check();
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"></noscript>
 	
 	<!-- Custom CSS -->
-    <link href="<?= asset('assets/css/public.css') ?>?v=20260727" rel="stylesheet">
+    <link href="<?= asset('assets/css/public.css') ?>?v=20260807c" rel="stylesheet">
 
     <!-- SEO Meta -->
     <?php require __DIR__ . '/../partials/seo-meta.php'; ?>
@@ -159,7 +159,7 @@ $_isLoggedIn = Auth::check();
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-slate-900 dark:bg-slate-950 text-slate-400 mt-auto">
+    <footer class="bg-brand-950 dark:bg-brand-950 text-slate-400 mt-auto">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <!-- Brand -->
@@ -201,20 +201,20 @@ $_isLoggedIn = Auth::check();
                 <div>
                     <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Síguenos</h3>
                     <div class="flex gap-3">
-                        <a href="#" class="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-800 hover:bg-brand-600 text-slate-400 hover:text-white transition-all" aria-label="Twitter">
+                        <a href="#" class="flex items-center justify-center w-10 h-10 rounded-lg bg-brand-900/70 hover:bg-brand-600 text-slate-400 hover:text-white transition-all" aria-label="Twitter">
                             <i data-lucide="twitter" class="w-5 h-5"></i>
                         </a>
-                        <a href="#" class="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-800 hover:bg-brand-600 text-slate-400 hover:text-white transition-all" aria-label="Facebook">
+                        <a href="#" class="flex items-center justify-center w-10 h-10 rounded-lg bg-brand-900/70 hover:bg-brand-600 text-slate-400 hover:text-white transition-all" aria-label="Facebook">
                             <i data-lucide="facebook" class="w-5 h-5"></i>
                         </a>
-                        <a href="#" class="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-800 hover:bg-brand-600 text-slate-400 hover:text-white transition-all" aria-label="YouTube">
+                        <a href="#" class="flex items-center justify-center w-10 h-10 rounded-lg bg-brand-900/70 hover:bg-brand-600 text-slate-400 hover:text-white transition-all" aria-label="YouTube">
                             <i data-lucide="youtube" class="w-5 h-5"></i>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div class="border-t border-slate-800 mt-8 pt-8 text-xs text-center text-slate-500">
+            <div class="border-t border-brand-900/60 mt-8 pt-8 text-xs text-center text-slate-500">
                 &copy; <?= date('Y') ?> AlphaLatam. Todos los derechos reservados.
             </div>
         </div>
@@ -284,8 +284,8 @@ $_isLoggedIn = Auth::check();
         loadEmbedScripts();
     });
     </script>
-    <!-- Lucide Icons (deferred, non-blocking) -->
-    <script defer src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js" onload="if(typeof lucide!=='undefined')lucide.createIcons()"></script>
+    <!-- Lucide Icons (local, deferred, non-blocking) -->
+    <script defer src="<?= asset('assets/vendor/js/lucide.min.js') ?>?v=20260807" onload="if(typeof lucide!=='undefined')lucide.createIcons()"></script>
 
 	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2634424902791842"
      crossorigin="anonymous"></script>

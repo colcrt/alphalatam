@@ -3,56 +3,7 @@ $title = 'Admin - ' . ucfirst($module ?? '');
 ob_start();
 ?>
 <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 dark:bg-slate-950 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0">
-        <div class="flex items-center gap-2.5 px-5 py-4 border-b border-slate-800">
-            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-600 text-white shrink-0">
-                <i data-lucide="shield-alert" class="w-4 h-4"></i>
-            </span>
-            <span class="text-base font-bold text-white">Admin</span>
-        </div>
-        <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-            <a href="<?= url('/admin/dashboard') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors <?= ($module ?? '') === 'dashboard' ? 'bg-slate-800 text-white' : '' ?>">
-                <i data-lucide="gauge" class="w-4 h-4 shrink-0"></i> Dashboard
-            </a>
-            <?php if ($user->puedePublicar() || $user->role === 'revisor'): ?>
-            <a href="<?= url('/admin/blog') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors <?= ($module ?? '') === 'blog' ? 'bg-slate-800 text-white' : '' ?>">
-                <i data-lucide="file-pen-line" class="w-4 h-4 shrink-0"></i> Artículos
-            </a>
-            <?php endif; ?>
-            <?php if ($user->esAdmin()): ?>
-            <a href="<?= url('/admin/categorias') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors <?= ($module ?? '') === 'categoria' ? 'bg-slate-800 text-white' : '' ?>">
-                <i data-lucide="folder" class="w-4 h-4 shrink-0"></i> Categorías
-            </a>
-            <?php endif; ?>
-            <?php if ($user->esAdmin() || $user->role === 'revisor'): ?>
-            <a href="<?= url('/admin/comentarios') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors <?= ($module ?? '') === 'comentario' ? 'bg-slate-800 text-white' : '' ?>">
-                <i data-lucide="message-circle" class="w-4 h-4 shrink-0"></i> Comentarios
-            </a>
-            <?php endif; ?>
-            <?php if ($user->esAdmin() || $user->role === 'revisor'): ?>
-            <a href="<?= url('/admin/denuncias') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors <?= ($module ?? '') === 'denuncia' ? 'bg-slate-800 text-white' : '' ?>">
-                <i data-lucide="megaphone" class="w-4 h-4 shrink-0"></i> Denuncias
-            </a>
-            <?php endif; ?>
-            <div class="pt-4 pb-2 px-3"><span class="text-[0.65rem] font-semibold uppercase tracking-widest text-slate-600">Sistema</span></div>
-            <a href="<?= url('/admin/two-factor') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors">
-                <i data-lucide="shield-check" class="w-4 h-4 shrink-0"></i> 2FA
-            </a>
-            <a href="<?= url('/admin/mi-perfil') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors">
-                <i data-lucide="user" class="w-4 h-4 shrink-0"></i> Mi Perfil
-            </a>
-            <form method="POST" action="<?= url('/logout') ?>" class="mt-1">
-                <?= csrf_field() ?>
-                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors text-left">
-                    <i data-lucide="log-out" class="w-4 h-4 shrink-0"></i> Salir
-                </button>
-            </form>
-        </nav>
-    </aside>
-
-    <!-- Mobile overlay -->
-    <div id="admin-sidebar-overlay" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/50 z-30 lg:hidden hidden"></div>
+    <?php require __DIR__ . '/../partials/admin-sidebar.php'; ?>
 
     <!-- Main content -->
     <div class="flex-1 min-w-0 lg:ml-64">
@@ -68,7 +19,7 @@ ob_start();
         </header>
 
         <!-- Vue app root -->
-        <div class="p-4 sm:p-6" id="app" data-module="<?= esc($module ?? '') ?>">
+        <div class="p-4 sm:p-6" id="app" data-module="<?= esc($module ?? '') ?>" data-role="<?= esc($user->role ?? '') ?>">
 
             <!-- Flash message -->
             <div v-show="message.text"
@@ -84,19 +35,24 @@ ob_start();
             </div>
 
             <!-- Loading -->
-            <div v-show="loading" class="flex items-center justify-center py-20">
+            <div v-cloak v-show="loading" class="flex items-center justify-center py-20">
                 <div class="flex flex-col items-center gap-3">
                     <div class="w-10 h-10 border-4 border-brand-200 dark:border-brand-800 border-t-brand-600 rounded-full animate-spin"></div>
                     <span class="text-sm text-slate-500 dark:text-slate-400">Cargando...</span>
                 </div>
             </div>
+            <noscript>
+                <div class="flex items-center justify-center py-20">
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Este panel necesita JavaScript. Actívalo para gestionar el contenido.</p>
+                </div>
+            </noscript>
 
             <!-- ===== LIST VIEW ===== -->
             <div v-show="!loading && view === 'list'" v-cloak>
                 <!-- Header -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                     <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ moduleName }}</h1>
-                    <button @click="createItem" class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl shadow-md shadow-brand-600/25 transition-all">
+                    <button v-if="!esSoloLectura" @click="createItem" class="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl shadow-md shadow-brand-600/25 transition-all">
                         <i data-lucide="plus" class="w-4 h-4"></i> Nuevo {{ singularName }}
                     </button>
                 </div>
@@ -141,6 +97,9 @@ ob_start();
                                     <td v-for="col in displayColumns" :key="col.key" class="px-4 py-3 text-slate-700 dark:text-slate-300">
                                         <template v-if="col.key === 'status'">
                                             <span :class="statusBadgeClass(item[col.key])" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold">{{ statusLabel(item[col.key]) }}</span>
+                                            <span v-if="item.delete_requested_at" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 ml-1" title="Solicitud de borrado pendiente de moderación">
+                                                <i data-lucide="hourglass" class="w-3 h-3"></i> Borrado solicitado
+                                            </span>
                                         </template>
                                         <template v-else-if="col.key === 'tipo'">
                                             {{ tipoLabel(item[col.key]) }}
@@ -156,15 +115,15 @@ ob_start();
                                         </template>
                                     </td>
                                     <td class="px-4 py-3 text-right space-x-1">
-                                        <button v-if="config && config.hasPublish && item.status !== 'publicado'" @click="publishItem(item)" title="Publicar"
+                                        <button v-if="!esSoloLectura && config && config.hasPublish && item.status !== 'publicado'" @click="publishItem(item)" title="Publicar"
                                                 class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950 transition-colors">
                                             <i data-lucide="globe" class="w-4 h-4"></i>
                                         </button>
-                                        <button @click="editItem(item)" title="Editar"
+                                        <button v-if="!esSoloLectura" @click="editItem(item)" title="Editar"
                                                 class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950 transition-colors">
                                             <i data-lucide="pencil" class="w-4 h-4"></i>
                                         </button>
-                                        <button @click="confirmDelete(item)" title="Eliminar"
+                                        <button v-if="!esSoloLectura" @click="confirmDelete(item)" title="Eliminar"
                                                 class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950 transition-colors">
                                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                                         </button>
@@ -244,6 +203,10 @@ ob_start();
                                     <div v-if="f.type === 'file' && imagenPreview && f.key === 'imagen_destacada'" class="mt-2">
                                         <img :src="imagenPreview" alt="Preview" class="w-full h-32 object-cover rounded-lg border border-slate-200 dark:border-slate-700">
                                     </div>
+                                    <div v-else-if="f.type === 'file' && mediaPreview && f.key === 'media_destacada'" class="mt-2">
+                                        <video v-if="mediaPreviewTipo === 'video'" :src="mediaPreview" controls muted loop playsinline class="w-full h-32 object-cover rounded-lg border border-slate-200 dark:border-slate-700"></video>
+                                        <img v-else :src="mediaPreview" alt="Preview" class="w-full h-32 object-cover rounded-lg border border-slate-200 dark:border-slate-700">
+                                    </div>
                                     <textarea v-else-if="f.type === 'textarea' && !f.wysiwyg"
                                               class="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all min-h-[100px]"
                                               :class="errors[f.key] ? 'border-red-500' : 'border-slate-200 dark:border-slate-700'"
@@ -261,9 +224,10 @@ ob_start();
                                                class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-brand-600 focus:ring-2 focus:ring-brand-500">
                                         <span class="text-sm font-medium text-slate-700 dark:text-slate-200">
                                             {{ f.label }}
-                                            <span class="block text-xs text-slate-400 dark:text-slate-500 font-normal">Se muestra como nota principal en la portada. Si marcas varias, se usa la más reciente publicada.</span>
+                                            <span v-if="f.hint" class="block text-xs text-slate-400 dark:text-slate-500 font-normal">{{ f.hint }}</span>
                                         </span>
                                     </label>
+                                    <p v-if="f.hint && f.type !== 'checkbox'" class="text-xs text-slate-400 dark:text-slate-500 mt-1.5">{{ f.hint }}</p>
                                     <p v-show="errors[f.key]" class="text-sm text-red-500 mt-1">{{ errors[f.key] }}</p>
                                 </div>
                             </template>
@@ -324,14 +288,14 @@ ob_start();
                  class="fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity">
                 <div class="absolute inset-0 bg-black/50" @click="cancelDelete"></div>
                 <div class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-700 transition-transform">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Confirmar eliminación</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">¿Está seguro de eliminar este {{ singularName }}? Esta acción no se puede deshacer.</p>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">{{ deleteModalTitle }}</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">{{ deleteModalBody }}</p>
                     <div class="flex justify-end gap-3">
                         <button @click="cancelDelete" class="px-4 py-2 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Cancelar</button>
                         <button @click="executeDelete" :disabled="deleteSaving"
                                 class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl shadow-md transition-all disabled:opacity-50">
                             <div v-show="deleteSaving" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            {{ deleteSaving ? 'Eliminando...' : 'Eliminar' }}
+                            {{ deleteSaving ? 'Procesando...' : deleteConfirmLabel }}
                         </button>
                     </div>
                 </div>

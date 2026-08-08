@@ -1,3 +1,37 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================
+   Base — tipografía editorial (web pública)
+   ============================================ */
+@layer base {
+    /* Titulares en serif editorial (Merriweather) */
+    h1, h2, h3 {
+        font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        text-wrap: balance;
+    }
+
+    /* Selección con acento de marca */
+    ::selection {
+        background-color: rgb(37 99 235 / 0.18);
+    }
+    .dark ::selection {
+        background-color: rgb(59 111 240 / 0.28);
+    }
+}
+
+/* ============================================
+   Components — patrones reutilizables
+   ============================================ */
+@layer components {
+    /* Bloque de color navío (headers de página, hero) */
+    .block-navy {
+        background-image: linear-gradient(160deg, #101c46 0%, #1e3a8a 78%, #1e40af 100%);
+    }
+    .dark .block-navy {
+        background-image: linear-gradient(160deg, #0a1330 0%, #101c46 70%, #1e3a8a 100%);
+    }
+}

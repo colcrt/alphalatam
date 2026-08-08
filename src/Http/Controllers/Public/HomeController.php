@@ -21,6 +21,7 @@ class HomeController
             ->where('status', 'publicado')
             ->whereNull('deleted_at')
             ->where('id', '!=', $estelarId)
+            ->where('interes', '!=', 1)
             ->orderByDesc('published_at')
             ->limit(11)->get();
 
@@ -29,6 +30,7 @@ class HomeController
             ->where('status', 'publicado')
             ->whereNull('deleted_at')
             ->where('id', '!=', $estelarId)
+            ->where('interes', '!=', 1)
             ->orderByDesc('published_at')
             ->limit(12)->get();
 
@@ -37,8 +39,17 @@ class HomeController
             ->where('status', 'publicado')
             ->whereNull('deleted_at')
             ->where('id', '!=', $estelarId)
+            ->where('interes', '!=', 1)
             ->orderByDesc('published_at')
             ->limit(10)->get();
+
+        $interesRecientes = Connection::table('blog_posts')
+            ->where('interes', 1)
+            ->where('status', 'publicado')
+            ->whereNull('deleted_at')
+            ->where('id', '!=', $estelarId)
+            ->orderByDesc('published_at')
+            ->limit(3)->get();
 
         $encuesta = null;
         $reto = null;
@@ -76,6 +87,7 @@ class HomeController
             'noticiasRecientes' => $noticiasRecientes,
             'opinionRecientes' => $opinionRecientes,
             'investigacionesRecientes' => $investigacionesRecientes,
+            'interesRecientes' => $interesRecientes,
             'estelar' => $estelar,
             'encuesta' => $encuesta,
             'reto' => $reto,
@@ -93,7 +105,8 @@ class HomeController
                 ->leftJoin('users', 'users.id', '=', 'blog_posts.autor_id')
                 ->select('blog_posts.*', 'users.name as autor_nombre')
                 ->where('blog_posts.status', 'publicado')
-                ->whereNull('blog_posts.deleted_at');
+                ->whereNull('blog_posts.deleted_at')
+                ->where('blog_posts.interes', '!=', 1);
 
             foreach ($condiciones as $columna => $valor) {
                 $query = $query->where($columna, $valor);

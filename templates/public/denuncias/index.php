@@ -6,7 +6,7 @@ ob_start();
 
     <!-- Encabezado -->
     <div class="text-center mb-10">
-        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-600 text-white mb-4 shadow-lg shadow-brand-600/25">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-900 text-white mb-4 shadow-lg shadow-brand-950/30">
             <i data-lucide="shield-alert" class="w-7 h-7"></i>
         </div>
         <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight tracking-tight">
@@ -19,23 +19,23 @@ ob_start();
 
     <!-- Cómo funciona -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-card">
             <div class="flex items-center gap-2 mb-2">
-                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 text-sm font-bold">1</span>
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-900 text-white dark:bg-brand-800 text-sm font-bold">1</span>
                 <span class="text-sm font-semibold text-slate-900 dark:text-white">Comparte la información</span>
             </div>
             <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Cuéntanos lo ocurrido con el mayor detalle posible. Si tienes documentos, enlaces, fotografías o cualquier otro material que ayude a entender el caso, también puedes incluirlos..</p>
         </div>
-        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-card">
             <div class="flex items-center gap-2 mb-2">
-                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 text-sm font-bold">2</span>
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-900 text-white dark:bg-brand-800 text-sm font-bold">2</span>
                 <span class="text-sm font-semibold text-slate-900 dark:text-white">La revisamos cuidadosamente</span>
             </div>
             <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Nuestro equipo editorial analiza cada envío, verifica la información disponible y evalúa si existen elementos suficientes para iniciar una investigación periodística.</p>
         </div>
-        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-card">
             <div class="flex items-center gap-2 mb-2">
-                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 text-sm font-bold">3</span>
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-brand-900 text-white dark:bg-brand-800 text-sm font-bold">3</span>
                 <span class="text-sm font-semibold text-slate-900 dark:text-white">Investigamos y publicamos</span>
             </div>
             <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Cuando la información está debidamente sustentada y supera nuestro proceso de verificación, elaboramos un artículo bajo nuestra responsabilidad editorial.</p>
@@ -43,7 +43,7 @@ ob_start();
     </div>
 
     <!-- Nota de confidencialidad -->
-    <div class="flex gap-3 p-4 mb-10 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-200 rounded-xl">
+    <div class="flex gap-3 p-4 mb-10 bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900 text-sky-900 dark:text-sky-200 rounded-xl">
         <i data-lucide="lock" class="w-5 h-5 shrink-0 mt-0.5"></i>
         <p class="text-sm leading-relaxed">
             <strong>Confidencialidad:</strong> Tu correo electrónico es opcional y solo se utilizará si necesitamos comunicarnos contigo para solicitar información adicional. Nunca se publica ni se comparte con terceros. Además, no almacenamos tu dirección IP. La decisión de investigar o publicar un caso corresponde exclusivamente a nuestro equipo editorial.
@@ -51,7 +51,7 @@ ob_start();
     </div>
 
     <!-- Formulario -->
-    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 md:p-8">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card p-6 md:p-8">
         <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Formulario de denuncia</h2>
 
         <form action="<?= esc(url('/denuncias')) ?>" method="POST" class="space-y-5">

@@ -21,8 +21,13 @@ class BlogPost extends Model
         'categoria_id',
         'autor_id',
         'imagen_destacada_path',
+        'media_destacada_path',
+        'media_destacada_tipo',
+        'card_embed_url',
+        'card_embed_html',
         'status',
         'destacado',
+        'interes',
         'published_at',
         'meta_title',
         'meta_description',
@@ -30,12 +35,15 @@ class BlogPost extends Model
         'og_image_path',
         'schema_json',
         'fuentes',
+        'delete_requested_at',
+        'delete_requested_by',
     ];
 
     protected array $casts = [
         'published_at' => 'datetime',
         'schema_json' => 'array',
         'destacado' => 'boolean',
+        'interes' => 'boolean',
     ];
 
     public function categoria(): ?BlogCategoria
@@ -61,6 +69,11 @@ class BlogPost extends Model
     public function etiquetas(): array
     {
         return $this->morphToMany(Etiqueta::class, 'etiquetables', 'etiquetable_type', 'etiquetable_id');
+    }
+
+    public function tieneSolicitudBorrado(): bool
+    {
+        return $this->delete_requested_at !== null;
     }
 
     public static function publicados(): \App\Database\QueryBuilder

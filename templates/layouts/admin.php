@@ -30,12 +30,13 @@ header('Content-Type: text/html; charset=utf-8');
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
 
-    <!-- Quill.js -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js"></script>
+    <!-- Quill.js (local, non-blocking CSS) -->
+    <link rel="preload" href="<?= asset('assets/vendor/css/quill.snow.min.css') ?>?v=20260807" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="<?= asset('assets/vendor/css/quill.snow.min.css') ?>?v=20260807" rel="stylesheet"></noscript>
+    <script defer src="<?= asset('assets/vendor/js/quill.min.js') ?>?v=20260807"></script>
 
     <!-- Custom CSS -->
-    <link href="<?= asset('assets/css/admin.css') ?>?v=20260725-2" rel="stylesheet">
+    <link href="<?= asset('assets/css/admin.css') ?>?v=20260807" rel="stylesheet">
 
     <!-- Dark mode init (prevent flash) -->
     <script>
@@ -59,11 +60,11 @@ header('Content-Type: text/html; charset=utf-8');
 
 <?= $content ?>
 
-<!-- Vue 3 (deferred) -->
-<script defer src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<!-- Vue 3 (local, con fallback a CDN) -->
+<script defer src="<?= asset('assets/vendor/js/vue.global.prod.js') ?>?v=20260807" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js';"></script>
 
 <!-- App JS -->
-<script defer src="<?= asset('assets/js/admin/app.js') ?>?v=20260725-2"></script>
+<script defer src="<?= asset('assets/js/admin/app.js') ?>?v=20260807"></script>
 
 <!-- Lucide re-init + Sidebar toggle + Dark mode toggle -->
 <script>
@@ -105,7 +106,7 @@ function showTab(tab) {
     });
 }
 </script>
-<!-- Lucide Icons (deferred, non-blocking) -->
-<script defer src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js" onload="if(typeof lucide!=='undefined')lucide.createIcons()"></script>
+<!-- Lucide Icons (local, deferred) -->
+<script defer src="<?= asset('assets/vendor/js/lucide.min.js') ?>?v=20260807" onload="if(typeof lucide!=='undefined')lucide.createIcons()"></script>
 </body>
 </html>

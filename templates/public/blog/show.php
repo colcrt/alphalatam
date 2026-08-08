@@ -7,9 +7,9 @@ $tipoLabelMap = [
     'investigacion' => 'Investigación',
 ];
 $tipoBadgeMap = [
-    'noticia' => 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
-    'opinion' => 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-    'investigacion' => 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
+    'noticia' => 'bg-brand-700 text-white dark:bg-brand-900 dark:text-brand-100',
+    'opinion' => 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-200',
+    'investigacion' => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200',
 ];
 
 ob_start();
@@ -17,27 +17,27 @@ ob_start();
 
 <!-- Article Header -->
 <article itemscope itemtype="https://schema.org/NewsArticle">
-    <header class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+    <header class="block-navy border-b border-brand-900 dark:border-brand-900">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
             <!-- Type badge -->
             <?php if (!empty($post->tipo)): ?>
             <?php
                 $tipo = $post->tipo;
-                $badge = $tipoBadgeMap[$tipo] ?? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+                $badge = $tipoBadgeMap[$tipo] ?? 'bg-white/10 text-brand-50 border border-white/20';
                 $label = $tipoLabelMap[$tipo] ?? ucfirst($tipo);
             ?>
             <div class="mb-4">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold <?= $badge ?>"><?= esc($label) ?></span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider <?= $badge ?>"><?= esc($label) ?></span>
             </div>
             <?php endif; ?>
 
             <!-- Title -->
-            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight tracking-tight mb-4" itemprop="headline">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white leading-tight tracking-tight mb-4" itemprop="headline">
                 <?= esc($post->titulo) ?>
             </h1>
 
             <!-- Meta -->
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-brand-200">
                 <?php if (!empty($post->autor_nombre)): ?>
                 <span class="inline-flex items-center gap-1.5" itemprop="author" itemscope itemtype="https://schema.org/Person">
                     <i data-lucide="user" class="w-4 h-4"></i>
@@ -70,9 +70,18 @@ ob_start();
                  width="1200" height="675"
                  fetchpriority="high"
                  decoding="async"
-                 class="w-full rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800"
+                 class="w-full rounded-2xl shadow-2xl shadow-brand-950/20 border border-white/10"
                  loading="eager">
         </figure>
+    </div>
+    <?php endif; ?>
+
+    <!-- Embed no-video de la tarjeta (Tweets, Instagram, TikTok...) -->
+    <?php if (!empty($post->card_embed_html) && !es_embed_video_tarjeta($post->card_embed_html)): ?>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        <div class="post-content !mt-0">
+            <?= $post->card_embed_html ?>
+        </div>
     </div>
     <?php endif; ?>
 
@@ -105,7 +114,7 @@ ob_start();
 
 <!-- Related Posts -->
 <?php if (!empty($postsRelacionados)): ?>
-<section class="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+<section class="bg-brand-50/70 dark:bg-brand-950/60 border-t border-brand-100 dark:border-brand-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Artículos Relacionados</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -115,20 +124,15 @@ ob_start();
                 $rBadge = $tipoBadgeMap[$rTipo] ?? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
                 $rLabel = $tipoLabelMap[$rTipo] ?? ucfirst($rTipo);
             ?>
-            <a href="<?= esc(route('blog.show', ['slug' => $rel->slug])) ?>" class="group block bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <?php if (!empty($rel->imagen_destacada_path)): ?>
-                <img src="<?= esc(asset('uploads/' . $rel->imagen_destacada_path)) ?>" alt="<?= esc($rel->titulo) ?>" width="400" height="160" loading="lazy" decoding="async" class="w-full h-40 object-cover">
-                <?php else: ?>
-                <div class="w-full h-40 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center">
-                    <i data-lucide="file-text" class="w-8 h-8 text-slate-300 dark:text-slate-500"></i>
-                </div>
-                <?php endif; ?>
+            <a href="<?= esc(route('blog.show', ['slug' => $rel->slug])) ?>" class="group block bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-card hover:shadow-lift transition-all duration-300 hover:-translate-y-0.5">
+                <?= render_card_media($rel, '', 'w-full h-40 object-cover')
+                    ?: '<div class="w-full h-40 bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-950 dark:to-brand-900 flex items-center justify-center"><i data-lucide="file-text" class="w-8 h-8 text-brand-300 dark:text-brand-700"></i></div>' ?>
                 <div class="p-4">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold <?= $rBadge ?> mb-2"><?= esc($rLabel) ?></span>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider <?= $rBadge ?> mb-2"><?= esc($rLabel) ?></span>
                     <h3 class="text-sm font-bold text-slate-900 dark:text-white line-clamp-2 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                         <?= esc($rel->titulo) ?>
                     </h3>
-                    <span class="text-xs text-slate-400 dark:text-slate-500 mt-2 inline-block"><?= esc(date_format_es($rel->published_at ?? '')) ?></span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 mt-2 inline-block"><?= esc(date_format_es($rel->published_at ?? '')) ?></span>
                 </div>
             </a>
             <?php endforeach; ?>

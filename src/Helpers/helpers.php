@@ -114,3 +114,52 @@ function json_ld(array $data): string
 {
     return '<script type="application/ld+json">' . json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
 }
+
+function es_embed_video_tarjeta(string $embedHtml): bool
+{
+    foreach (['embed-youtube', 'embed-vimeo', 'embed-dailymotion', 'embed-spotify', 'embed-soundcloud'] as $clase) {
+        if (str_contains($embedHtml, $clase)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Media de la tarjeta de un artículo. Precedencia:
+ *   1. Embed oEmbed de video (card_embed_html)  2. Media animada (GIF/MP4/WebM)  3. Imagen estática.
+ * Devuelve '' si no hay nada que mostrar.
+ */
+function render_card_media(array|object $post, string $contenedorClases = '', string $mediaClases = 'w-full h-full object-cover'): string
+{
+    $obtener = static fn(string $campo): string => (string) (is_object($post) ? ($post->$campo ?? '') : ($post[$campo] ?? ''));
+
+    $titulo = esc($obtener('titulo'));
+    $imagen = $obtener('imagen_destacada_path');
+    $mediaPath = $obtener('media_destacada_path');
+    $mediaTipo = $obtener('media_destacada_tipo');
+    $embedHtml = $obtener('card_embed_html');
+
+    if ($embedHtml !== '' && es_embed_video_tarjeta($embedHtml)) {
+        $clasesContenedor = $contenedorClases !== '' ? $contenedorClases : $mediaClases;
+        if (!str_contains($clasesContenedor, 'overflow')) {
+            $clasesContenedor .= ' overflow-hidden';
+        }
+        return '<div class="media-card ' . esc($clasesContenedor) . '">' . $embedHtml . '</div>';
+    }
+
+    if ($mediaPath !== '' && $mediaTipo === 'gif') {
+        return '<img src="' . esc(asset('uploads/' . $mediaPath)) . '" alt="' . $titulo . '" loading="lazy" decoding="async" class="' . esc($mediaClases) . '">';
+    }
+
+    if ($mediaPath !== '' && $mediaTipo === 'video') {
+        $poster = $imagen !== '' ? ' poster="' . esc(asset('uploads/' . $imagen)) . '"' : '';
+        return '<video autoplay muted loop playsinline preload="auto"' . $poster . ' class="' . esc($mediaClases) . '"><source src="' . esc(asset('uploads/' . $mediaPath)) . '"></video>';
+    }
+
+    if ($imagen !== '') {
+        return '<img src="' . esc(asset('uploads/' . $imagen)) . '" alt="' . $titulo . '" loading="lazy" decoding="async" class="' . esc($mediaClases) . '">';
+    }
+
+    return '';
+}

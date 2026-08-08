@@ -5,6 +5,7 @@ ob_start();
 $noticias = $noticiasRecientes ?? [];
 $opinion = $opinionRecientes ?? [];
 $investigaciones = $investigacionesRecientes ?? [];
+$interes = $interesRecientes ?? [];
 $estelar = $estelar ?? null;
 
 function render_post_card(array $post, string $badgeClass, string $tipoLabel, string $size = 'normal'): string
@@ -16,26 +17,24 @@ function render_post_card(array $post, string $badgeClass, string $tipoLabel, st
     $imagen = $post['imagen_destacada_path'] ?? '';
     $href = url('/blog/post/' . $slug);
 
-    $imgHtml = $imagen
-        ? '<img src="' . esc(asset('uploads/' . $imagen)) . '" alt="' . $titulo . '" width="400" height="192" loading="lazy" decoding="async" class="w-full h-48 object-cover rounded-t-xl">'
-        : '<div class="w-full h-48 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 rounded-t-xl flex items-center justify-center"><i data-lucide="file-text" class="w-10 h-10 text-slate-300 dark:text-slate-600"></i></div>';
+    $imgHtml = render_card_media($post, '', 'w-full h-48 object-cover rounded-t-xl')
+        ?: '<div class="w-full h-48 bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-950 dark:to-brand-900 rounded-t-xl flex items-center justify-center"><i data-lucide="file-text" class="w-10 h-10 text-brand-300 dark:text-brand-700"></i></div>';
 
     $imgThumb = $imagen
         ? '<img src="' . esc(asset('uploads/' . $imagen)) . '" alt="' . $titulo . '" width="160" height="112" loading="lazy" decoding="async" class="w-24 h-20 sm:w-32 sm:h-24 object-cover rounded-lg shrink-0">'
-        : '<div class="w-24 h-20 sm:w-32 sm:h-24 shrink-0 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center"><i data-lucide="file-text" class="w-6 h-6 text-slate-300 dark:text-slate-600"></i></div>';
+        : '<div class="w-24 h-20 sm:w-32 sm:h-24 shrink-0 rounded-lg bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-950 dark:to-brand-900 flex items-center justify-center"><i data-lucide="file-text" class="w-6 h-6 text-brand-300 dark:text-brand-700"></i></div>';
 
-    $imgSplit = $imagen
-        ? '<img src="' . esc(asset('uploads/' . $imagen)) . '" alt="' . $titulo . '" width="640" height="360" loading="lazy" decoding="async" class="w-full h-48 lg:h-full object-cover">'
-        : '<div class="w-full h-48 lg:h-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center"><i data-lucide="file-text" class="w-10 h-10 text-slate-300 dark:text-slate-600"></i></div>';
+    $imgSplit = render_card_media($post, '', 'w-full h-48 lg:h-full object-cover')
+        ?: '<div class="w-full h-48 lg:h-full bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-950 dark:to-brand-900 flex items-center justify-center"><i data-lucide="file-text" class="w-10 h-10 text-brand-300 dark:text-brand-700"></i></div>';
 
     if ($size === 'featured') {
         return <<<HTML
-    <article class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+    <article class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-card hover:shadow-lift transition-all duration-300 hover:-translate-y-0.5">
         <a href="{$href}" class="block">
             {$imgHtml}
             <div class="p-5">
                 <div class="flex items-center gap-2 mb-3">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {$badgeClass}">{$tipoLabel}</span>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider {$badgeClass}">{$tipoLabel}</span>
                     <span class="text-xs text-slate-400 dark:text-slate-500"><i data-lucide="calendar-days" class="w-3.5 h-3.5 inline -mt-0.5"></i> {$fecha}</span>
                 </div>
                 <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{$titulo}</h3>
@@ -51,9 +50,9 @@ HTML;
 
     if ($size === 'split') {
         return <<<HTML
-    <article class="group h-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+    <article class="card-split group h-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-card hover:shadow-lift transition-all duration-300 hover:-translate-y-0.5">
         <a href="{$href}" class="block h-full lg:grid lg:grid-cols-2">
-            {$imgSplit}
+            <div class="media-celda relative overflow-hidden h-48">{$imgSplit}</div>
             <div class="p-5 flex flex-col justify-center">
                 <div class="flex items-center gap-2 mb-2">
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold {$badgeClass}">{$tipoLabel}</span>
@@ -72,7 +71,7 @@ HTML;
 
     if ($size === 'compact') {
         return <<<HTML
-    <article class="group h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+    <article class="group h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-card hover:shadow-lift transition-all duration-300 hover:-translate-y-0.5">
         <a href="{$href}" class="flex gap-4 p-3 h-full">
             {$imgThumb}
             <div class="min-w-0 flex flex-col justify-center">
@@ -87,13 +86,12 @@ HTML;
 HTML;
     }
 
-    $imgSmall = $imagen
-        ? '<img src="' . esc(asset('uploads/' . $imagen)) . '" alt="' . $titulo . '" width="400" height="160" loading="lazy" decoding="async" class="w-full h-40 object-cover rounded-t-xl">'
-        : '<div class="w-full h-40 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 rounded-t-xl flex items-center justify-center"><i data-lucide="file-text" class="w-10 h-10 text-slate-300 dark:text-slate-600"></i></div>';
+    $imgSmall = render_card_media($post, '', 'w-full h-40 object-cover rounded-t-xl')
+        ?: '<div class="w-full h-40 bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-950 dark:to-brand-900 rounded-t-xl flex items-center justify-center"><i data-lucide="file-text" class="w-10 h-10 text-brand-300 dark:text-brand-700"></i></div>';
 
     if ($size === 'grid4') {
         return <<<HTML
-    <article class="group h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+    <article class="group h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-card hover:shadow-lift transition-all duration-300 hover:-translate-y-0.5">
         <a href="{$href}" class="block h-full">
             {$imgSmall}
             <div class="p-4">
@@ -109,13 +107,12 @@ HTML;
 HTML;
     }
 
-    $imgGrid3 = $imagen
-        ? '<img src="' . esc(asset('uploads/' . $imagen)) . '" alt="' . $titulo . '" width="400" height="176" loading="lazy" decoding="async" class="w-full h-44 object-cover rounded-t-xl">'
-        : '<div class="w-full h-44 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 rounded-t-xl flex items-center justify-center"><i data-lucide="file-text" class="w-10 h-10 text-slate-300 dark:text-slate-600"></i></div>';
+    $imgGrid3 = render_card_media($post, '', 'w-full h-44 object-cover rounded-t-xl')
+        ?: '<div class="w-full h-44 bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-950 dark:to-brand-900 rounded-t-xl flex items-center justify-center"><i data-lucide="file-text" class="w-10 h-10 text-brand-300 dark:text-brand-700"></i></div>';
 
     if ($size === 'grid3') {
         return <<<HTML
-    <article class="group h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+    <article class="group h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-card hover:shadow-lift transition-all duration-300 hover:-translate-y-0.5">
         <a href="{$href}" class="block h-full">
             {$imgGrid3}
             <div class="p-4">
@@ -132,7 +129,7 @@ HTML;
     }
 
     return <<<HTML
-    <article class="group bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+    <article class="group bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-card hover:shadow-lift transition-all duration-300 hover:-translate-y-0.5">
         <a href="{$href}" class="block">
             {$imgHtml}
             <div class="p-4">
@@ -150,16 +147,40 @@ HTML;
 ?>
 
 <!-- CONTENIDO -->
-<div id="contenido" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div id="contenido" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ARTÍCULOS DE INTERÉS -->
+    <?php if (!empty($interes)): ?>
+    <section class="mb-5">
+        <div class="grid grid-cols-1 sm:grid-cols-3" style="column-gap:20px">
+            <?php foreach ($interes as $post): ?>
+            <?php
+                $iHref = url('/blog/post/' . esc($post->slug));
+                $iImg = $post->imagen_destacada_path ?? '';
+            ?>
+            <a href="<?= $iHref ?>" class="group flex items-center py-3 pr-3">
+                <?php if ($iImg): ?>
+                <img src="<?= esc(asset('uploads/' . $iImg)) ?>" alt="<?= esc($post->titulo ?? '') ?>" loading="lazy" decoding="async" style="width:89px;height:55px;margin-right:12px" class="object-cover shrink-0">
+                <?php else: ?>
+                <div style="width:89px;height:55px;margin-right:12px" class="shrink-0 bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-950 dark:to-brand-900 flex items-center justify-center">
+                    <i data-lucide="file-text" class="w-5 h-5 text-brand-300 dark:text-brand-700"></i>
+                </div>
+                <?php endif; ?>
+                <h3 class="min-w-0 text-sm font-bold leading-snug line-clamp-2 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors"><?= esc($post->titulo ?? '') ?></h3>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </section>
+    <?php endif; ?>
 
     <!-- SECCIÓN ESTELAR -->
         <?php if ($estelar): ?>
         <?php
             $eTipo = $estelar->tipo ?? 'noticia';
             $eBadgeMap = [
-                'noticia' => 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
-                'opinion' => 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-                'investigacion' => 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
+                'noticia' => 'bg-brand-700 text-white dark:bg-brand-900 dark:text-brand-100',
+                'opinion' => 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-200',
+                'investigacion' => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200',
             ];
             $eLabelMap = [
                 'noticia' => 'Noticia',
@@ -172,12 +193,7 @@ HTML;
             $eImg = $estelar->imagen_destacada_path ?? '';
         ?>
         <section class="mb-12">
-            <div class="flex items-center gap-2 mb-5">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-brand-600 text-white shadow-md shadow-brand-600/25">
-                    <i data-lucide="star" class="w-3.5 h-3.5"></i> Nota principal
-                </span>
-            </div>
-            <article data-no-reveal class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <article data-no-reveal class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-card hover:shadow-lift transition-all duration-300 hover:-translate-y-0.5">
                 <a href="<?= $eHref ?>" class="block lg:grid lg:grid-cols-2">
                     <?php if ($eImg): ?>
                     <div class="relative h-56 lg:h-full overflow-hidden">
@@ -186,13 +202,13 @@ HTML;
                              class="parallax w-full h-full object-cover" data-parallax>
                     </div>
                     <?php else: ?>
-                    <div class="w-full h-56 lg:h-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center">
-                        <i data-lucide="file-text" class="w-12 h-12 text-slate-300 dark:text-slate-600"></i>
+                    <div class="w-full h-56 lg:h-full bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-950 dark:to-brand-900 flex items-center justify-center">
+                        <i data-lucide="file-text" class="w-12 h-12 text-brand-300 dark:text-brand-700"></i>
                     </div>
                     <?php endif; ?>
-                    <div class="p-6 md:p-8 flex flex-col justify-center">
+                    <div class="p-6 md:p-8 flex flex-col justify-center bg-gradient-to-br from-white to-brand-50/60 dark:from-slate-900 dark:to-brand-950/40">
                         <div class="flex items-center gap-2 mb-3">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold <?= $eBadge ?>"><?= esc($eLabel) ?></span>
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider <?= $eBadge ?>"><?= esc($eLabel) ?></span>
                             <span class="text-xs text-slate-400 dark:text-slate-500"><?= esc(date_format_es($estelar->published_at ?? '')) ?></span>
                         </div>
                         <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white mb-3 leading-tight group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
@@ -220,7 +236,7 @@ HTML;
             $noticiasSplit = $noticiasItems[0] ?? null;
             $noticiasStack = array_slice($noticiasItems, 1, 2);
             $noticiasWide = array_slice($noticiasItems, 3, 7);
-            $badgeNoticia = 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300';
+            $badgeNoticia = 'bg-brand-700 text-white dark:bg-brand-900 dark:text-brand-100';
         ?>
         <section>
             <div class="seccion-empuje flex items-end justify-between mb-6">
@@ -252,9 +268,9 @@ HTML;
                     <?= render_post_card((array) $post, $badgeNoticia, 'Noticia', 'grid4') ?>
                 <?php endforeach; ?>
                 <?php if (!empty($encuesta)): ?>
-                <div data-reveal class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden h-full">
-                    <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
-                        <p class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">Trivia</p>
+                <div data-reveal class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-card overflow-hidden h-full">
+                    <div class="px-5 py-4 border-b border-brand-100 dark:border-brand-800 bg-brand-50 dark:bg-brand-950/60">
+                        <p class="text-xs font-bold uppercase tracking-wider text-brand-800 dark:text-brand-200">Trivia</p>
                     </div>
                     <div class="p-5" id="encuesta-widget" data-token="<?= esc(csrf_token()) ?>">
                         <p class="text-sm font-semibold text-slate-900 dark:text-white mb-4 leading-snug"><?= esc($encuesta['pregunta']) ?></p>
@@ -284,10 +300,10 @@ HTML;
             $opinionSplit = $opinionItems[0] ?? null;
             $opinionStacked = array_slice($opinionItems, 1, 3);
             $opinionWide = array_slice($opinionItems, 4, 7);
-            $badgeOpinion = 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300';
+            $badgeOpinion = 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-200';
         ?>
         <section>
-            <div class="seccion-empuje flex items-end justify-between mb-6">
+            <div class="seccion-empuje seccion-bg-celeste flex items-end justify-between mb-6">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Artículos de Opinión</h2>
                     <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Análisis y reflexiones de expertos</p>
@@ -316,16 +332,16 @@ HTML;
                     <?= render_post_card((array) $post, $badgeOpinion, 'Opinión', 'grid4') ?>
                 <?php endforeach; ?>
                 <?php if (!empty($reto)): ?>
-                <div data-reveal class="bg-white dark:bg-slate-900 rounded-2xl border border-amber-300 dark:border-amber-900 shadow-sm overflow-hidden h-full">
-                    <div class="px-5 py-4 border-b border-amber-100 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40">
-                        <p class="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Reto de la comunidad</p>
+                <div data-reveal class="bg-white dark:bg-slate-900 rounded-2xl border border-indigo-200 dark:border-indigo-900 shadow-card overflow-hidden h-full">
+                    <div class="px-5 py-4 border-b border-indigo-100 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/40">
+                        <p class="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-200">Reto de la comunidad</p>
                     </div>
                     <div class="p-5" id="reto-widget" data-token="<?= esc(csrf_token()) ?>">
                         <p class="text-sm font-semibold text-slate-900 dark:text-white mb-4 leading-snug"><?= esc($reto['pregunta']) ?></p>
                         <div id="reto-opciones">
                             <?php foreach ($reto['opciones'] as $i => $opcion): ?>
                             <button type="button" data-opcion="<?= (int) $i ?>" data-texto="<?= esc($opcion['texto']) ?>"
-                                    class="reto-btn w-full text-left px-4 py-2.5 mb-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950 transition-all">
+                                    class="reto-btn w-full text-left px-4 py-2.5 mb-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-700 dark:text-slate-200 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950 transition-all">
                                 <?= esc($opcion['texto']) ?>
                             </button>
                             <?php endforeach; ?>
@@ -344,7 +360,7 @@ HTML;
         <!-- INVESTIGACIONES -->
         <?php if (!empty($investigaciones)): ?>
         <section>
-            <div class="seccion-empuje flex items-end justify-between mb-6">
+            <div class="seccion-empuje seccion-bg-lavanda flex items-end justify-between mb-6">
                 <div>
                     <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Investigaciones</h2>
                     <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Periodismo de investigación</p>
@@ -355,7 +371,7 @@ HTML;
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 <?php foreach ($investigaciones as $post): ?>
-                    <?= render_post_card((array) $post, 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300', 'Investigación', 'grid3') ?>
+                    <?= render_post_card((array) $post, 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200', 'Investigación', 'grid3') ?>
                 <?php endforeach; ?>
             </div>
         </section>
@@ -363,33 +379,33 @@ HTML;
 </div>
 
 <!-- HERO COMPACTO -->
-<section class="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 border-b border-slate-200 dark:border-slate-800">
+<section class="relative overflow-hidden block-navy border-b border-brand-900 dark:border-brand-900">
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7">
         <div class="lg:max-w-2xl">
-            <div class="inline-flex items-center gap-2 px-3 py-1 bg-brand-50 dark:bg-brand-950 border border-brand-200 dark:border-brand-800 rounded-full text-brand-700 dark:text-brand-300 text-xs font-semibold mb-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/25 rounded-full text-brand-100 text-xs font-semibold mb-3">
                 <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
                 Plataforma de periodismo investigativo
             </div>
-            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight tracking-tight">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white leading-tight tracking-tight">
                 Periodismo de investigación, noticias y análisis sobre Colombia y América Latina
             </h1>
-            <p class="text-sm md:text-base text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+            <p class="text-sm md:text-base text-brand-100/90 mt-2 leading-relaxed">
                 Investigaciones respaldadas por documentos, datos y contexto para entender el poder más allá de los titulares.
             </p>
         </div>
         <div class="mt-6 lg:mt-8 max-w-xl">
-            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+            <p class="text-xs font-semibold uppercase tracking-wider text-brand-200 mb-2">
                 Boletín diario
             </p>
             <form action="<?= esc(url('/boletin/suscribir')) ?>" method="POST" class="flex gap-2">
                 <?= csrf_field() ?>
                 <input type="email" name="email" required placeholder="Tu correo electrónico"
-                       class="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all">
-                <button type="submit" class="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-sm font-semibold rounded-xl shadow-md shadow-slate-900/25 hover:shadow-slate-900/40 transition-all">
+                       class="w-full px-3 py-2 text-sm bg-white dark:bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-brand-300 focus:border-brand-300 transition-all">
+                <button type="submit" class="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-white hover:bg-brand-50 text-brand-950 text-sm font-semibold rounded-xl shadow-md shadow-brand-950/30 hover:shadow-brand-950/40 transition-all">
                     Suscribirme
                 </button>
             </form>
-            <p class="text-xs text-slate-400 dark:text-slate-500 mt-2">Resumen diario de investigaciones en tu correo.</p>
+            <p class="text-xs text-brand-200/80 mt-2">Resumen diario de investigaciones en tu correo.</p>
         </div>
     </div>
 </section>

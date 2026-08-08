@@ -80,7 +80,10 @@ $router->group(['prefix' => 'admin', 'middleware' => [\App\Core\Auth\AuthMiddlew
     // Blog CRUD
     $router->get('/blog', [new AdminBlogController(), 'index'])->name('admin.blog.index');
     $router->get('/blog/crear', [new AdminBlogController(), 'create'])->name('admin.blog.create');
+    $router->get('/blog/borrados', [new AdminBlogController(), 'borrados'])->name('admin.blog.borrados');
     $router->get('/blog/{id}/editar', [new AdminBlogController(), 'edit'])->name('admin.blog.edit');
+    $router->post('/blog/{id}/aprobar-borrado', [new AdminBlogController(), 'aprobarBorrado'])->name('admin.blog.borrados.aprobar');
+    $router->post('/blog/{id}/rechazar-borrado', [new AdminBlogController(), 'rechazarBorrado'])->name('admin.blog.borrados.rechazar');
 
     // Categorías
     $router->get('/categorias', function () {

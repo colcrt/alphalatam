@@ -9,9 +9,9 @@ $tipos = [
 ];
 
 $tipoBadgeMap = [
-    'noticia' => 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
-    'opinion' => 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-    'investigacion' => 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
+    'noticia' => 'bg-brand-700 text-white dark:bg-brand-900 dark:text-brand-100',
+    'opinion' => 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-200',
+    'investigacion' => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200',
 ];
 
 $tipoLabelMap = [
@@ -24,9 +24,9 @@ ob_start();
 ?>
 
 <!-- Header -->
-<section class="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+<section class="block-navy border-b border-brand-900 dark:border-brand-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">Blog</h1>
+        <h1 class="text-3xl font-extrabold text-white mb-4">Blog</h1>
 
         <!-- Filter pills -->
         <div class="flex flex-wrap gap-2">
@@ -34,8 +34,8 @@ ob_start();
             <?php
                 $isActive = ($tipoActual ?? null) === $key || (!$tipoActual && $key === '');
                 $activeClass = $isActive
-                    ? 'bg-brand-600 text-white shadow-md shadow-brand-600/25'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-600 hover:text-brand-600 dark:hover:text-brand-400';
+                    ? 'bg-white text-brand-900 shadow-md shadow-brand-950/20'
+                    : 'bg-white/10 text-brand-50 border border-white/20 hover:bg-white/20 hover:text-white';
             ?>
             <a href="<?= esc(url('/blog') . ($key ? '?tipo=' . $key : '')) ?>"
                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 <?= $activeClass ?>">
@@ -44,7 +44,7 @@ ob_start();
             <?php endforeach; ?>
         </div>
 
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-3"><?= $paginator['total'] ?> artículos</p>
+        <p class="text-sm text-brand-200 mt-3"><?= $paginator['total'] ?> artículos</p>
     </div>
 </section>
 
@@ -64,25 +64,16 @@ ob_start();
             $badge = $tipoBadgeMap[$tipo] ?? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
             $label = $tipoLabelMap[$tipo] ?? ucfirst($tipo);
         ?>
-        <article class="group bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+        <article class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-card hover:shadow-lift transition-all duration-300 hover:-translate-y-0.5">
             <a href="<?= esc(route('blog.show', ['slug' => $post->slug])) ?>" class="block">
-                <?php if (!empty($post->imagen_destacada_path)): ?>
-                <img src="<?= esc(asset('uploads/' . $post->imagen_destacada_path)) ?>"
-                     alt="<?= esc($post->titulo) ?>"
-                     width="400" height="192"
-                     loading="lazy" decoding="async"
-                     class="w-full h-48 object-cover">
-                <?php else: ?>
-                <div class="w-full h-48 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center">
-                    <i data-lucide="file-text" class="w-10 h-10 text-slate-300 dark:text-slate-600"></i>
-                </div>
-                <?php endif; ?>
+                <?= render_card_media($post, '', 'w-full h-48 object-cover')
+                    ?: '<div class="w-full h-48 bg-gradient-to-br from-brand-50 to-brand-100 dark:from-brand-950 dark:to-brand-900 flex items-center justify-center"><i data-lucide="file-text" class="w-10 h-10 text-brand-300 dark:text-brand-700"></i></div>' ?>
 
                 <div class="p-5">
                     <div class="flex items-center gap-2 mb-3">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold <?= $badge ?>"><?= esc($label) ?></span>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider <?= $badge ?>"><?= esc($label) ?></span>
                         <?php if (!empty($post->categoria_nombre)): ?>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"><?= esc($post->categoria_nombre) ?></span>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-200"><?= esc($post->categoria_nombre) ?></span>
                         <?php endif; ?>
                     </div>
 
@@ -94,7 +85,7 @@ ob_start();
                     <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-4"><?= esc(str_limit($post->extracto, 120)) ?></p>
                     <?php endif; ?>
 
-                    <div class="flex items-center text-xs text-slate-400 dark:text-slate-500">
+                    <div class="flex items-center text-xs text-slate-500 dark:text-slate-400">
                         <?php if (!empty($post->autor_nombre)): ?>
                         <span class="inline-flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5"></i> <?= esc($post->autor_nombre) ?></span>
                         <?php endif; ?>

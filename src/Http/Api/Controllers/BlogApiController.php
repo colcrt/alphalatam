@@ -37,11 +37,21 @@ class BlogApiController
                 'categoria_id' => $_GET['categoria'] ?? null,
             ], fn ($v) => $v !== null && $v !== '');
 
-            if (!Auth::isAdmin() && Auth::user()->role === 'editor') {
+            if (!Auth::isAdmin()) {
                 $filtros['autor_id'] = Auth::id();
             }
 
             $resultado = $this->service->paraAdmin($filtros);
+
+            // El listado no necesita el HTML resuelto del embed (la tarjeta usa la
+            // URL y el HTML se regenera desde la ficha). Se descarta para aligerar el JSON.
+            $filas = array_map(function ($fila) {
+                if (is_object($fila)) {
+                    unset($fila->card_embed_html);
+                }
+                return $fila;
+            }, $resultado['data']);
+            $resultado['data'] = $filas;
 
             Response::json([
                 'data' => $resultado['data'],
@@ -83,12 +93,18 @@ class BlogApiController
 
             $datos = $request->json() ?? $request->all();
 
+            if (!Auth::isAdmin()) {
+                unset($datos['destacado']);
+                unset($datos['interes']);
+            }
+
             $validador = Validator::make($datos, [
                 'titulo' => 'required|string|min:2|max:255',
                 'tipo' => 'required|string|in:noticia,opinion,investigacion',
                 'categoria_id' => 'nullable|numeric',
                 'status' => 'nullable|string|in:borrador,publicado',
                 'destacado' => 'nullable|boolean',
+                'interes' => 'nullable|boolean',
                 'fuentes' => 'nullable|string',
             ]);
 
@@ -127,13 +143,23 @@ class BlogApiController
             }
 
             $post = BlogPost::find((int) $id);
-            if (!$post) {
+            if (!$post || $post->deleted_at !== null) {
                 Response::json(['error' => 'Post del blog no encontrado.'], 404);
+                return;
+            }
+
+            if (!Auth::isAdmin() && (int) $post->autor_id !== Auth::id()) {
+                Response::json(['error' => 'No tiene permiso para editar este artículo.'], 403);
                 return;
             }
 
             $request = Request::fromGlobals();
             $datos = $request->json() ?? $request->all();
+
+            if (!Auth::isAdmin()) {
+                unset($datos['destacado']);
+                unset($datos['interes']);
+            }
 
             $validador = Validator::make($datos, [
                 'titulo' => 'required|string|min:2|max:255',
@@ -141,6 +167,7 @@ class BlogApiController
                 'categoria_id' => 'nullable|numeric',
                 'status' => 'nullable|string|in:borrador,publicado',
                 'destacado' => 'nullable|boolean',
+                'interes' => 'nullable|boolean',
                 'fuentes' => 'nullable|string',
             ]);
 
@@ -174,8 +201,33 @@ class BlogApiController
             }
 
             $post = BlogPost::find((int) $id);
-            if (!$post) {
+            if (!$post || $post->deleted_at !== null) {
                 Response::json(['error' => 'Post del blog no encontrado.'], 404);
+                return;
+            }
+
+            if (!Auth::isAdmin()) {
+                if (!Auth::canPublish()) {
+                    Response::json(['error' => 'No tiene permiso para eliminar artículos.'], 403);
+                    return;
+                }
+
+                if ((int) $post->autor_id !== Auth::id()) {
+                    Response::json(['error' => 'No tiene permiso para eliminar este artículo.'], 403);
+                    return;
+                }
+
+                if ($post->tieneSolicitudBorrado()) {
+                    Response::json(['error' => 'Este artículo ya tiene una solicitud de borrado pendiente.'], 409);
+                    return;
+                }
+
+                $this->service->solicitarBorrado($post, Auth::id());
+
+                Response::json([
+                    'mensaje' => 'Solicitud de borrado enviada para moderación.',
+                    'moderacion' => true,
+                ]);
                 return;
             }
 
@@ -206,8 +258,13 @@ class BlogApiController
             }
 
             $post = BlogPost::find((int) $id);
-            if (!$post) {
+            if (!$post || $post->deleted_at !== null) {
                 Response::json(['error' => 'Post del blog no encontrado.'], 404);
+                return;
+            }
+
+            if (!Auth::isAdmin() && (int) $post->autor_id !== Auth::id()) {
+                Response::json(['error' => 'No tiene permiso para publicar este artículo.'], 403);
                 return;
             }
 

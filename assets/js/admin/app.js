@@ -26,9 +26,10 @@ const { createApp, ref, reactive, computed, onMounted, watch, nextTick } = Vue;
     Quill.register(EmbedContentBlot);
 })();
 
-createApp({
+const app = createApp({
     setup() {
         const module = document.getElementById('app')?.dataset.module || '';
+        const userRole = document.getElementById('app')?.dataset.role || '';
         const loading = ref(true);
         const view = ref('list');
         const items = ref([]);
@@ -45,6 +46,8 @@ createApp({
         const deleteSaving = ref(false);
         const categoriaOptions = ref([]);
         const imagenPreview = ref('');
+        const mediaPreview = ref('');
+        const mediaPreviewTipo = ref('');
         let quillEditor = null;
 
         // Embed modal state
@@ -66,6 +69,8 @@ createApp({
                     { key: 'extracto', label: 'Extracto', type: 'textarea', tab: 'general' },
                     { key: 'contenido', label: 'Contenido', type: 'textarea', tab: 'general', wysiwyg: true },
                     { key: 'imagen_destacada', label: 'Imagen destacada (card)', type: 'file', tab: 'general', accept: 'image/jpeg,image/png,image/gif,image/webp' },
+                    { key: 'media_destacada', label: 'Animación / video en tarjeta (opcional)', type: 'file', tab: 'general', accept: 'image/gif,video/mp4,video/webm', hint: 'GIF animado, MP4 (H.264) o WebM que se reproduce en la tarjeta del artículo. Casos excepcionales. Máximo 8MB.' },
+                    { key: 'card_embed_url', label: 'Embed en tarjeta (URL Instagram/Twitter...)', type: 'text', tab: 'general', hint: 'Si se define, la tarjeta reproduce el embed (Instagram, Twitter, YouTube, etc.) en lugar de la imagen/media. Se resuelve al guardar.' },
                     { key: 'tipo', label: 'Tipo', type: 'select', options: [
                         { value: 'noticia', label: 'Noticia' },
                         { value: 'opinion', label: 'Artículo de Opinión' },
@@ -76,7 +81,8 @@ createApp({
                         { value: 'borrador', label: 'Borrador' },
                         { value: 'publicado', label: 'Publicado' }
                     ], tab: 'general' },
-                    { key: 'destacado', label: 'Nota principal', type: 'checkbox', tab: 'general' },
+                    { key: 'destacado', label: 'Nota principal', type: 'checkbox', tab: 'general', adminOnly: true, hint: 'Se muestra como nota principal en la portada. Si marcas varias, se usa la más reciente publicada.' },
+                    { key: 'interes', label: 'Artículo de interés', type: 'checkbox', tab: 'general', adminOnly: true, hint: 'Se muestra en la sección "Artículos de interés" de la portada. Máximo 3: se muestran los más recientes marcados.' },
                     { key: 'meta_title', label: 'Meta Title', type: 'text', tab: 'seo' },
                     { key: 'meta_description', label: 'Meta Description', type: 'textarea', tab: 'seo' },
                     { key: 'fuentes', label: 'Fuentes', type: 'textarea', tab: 'fuentes' },
@@ -114,7 +120,15 @@ createApp({
         const config = computed(() => moduleConfig[module] || null);
         const moduleName = computed(() => config.value?.name || module);
         const singularName = computed(() => config.value?.singular || 'Registro');
-        const fields = computed(() => config.value?.fields || []);
+        const esAdmin = computed(() => userRole === 'admin');
+        const puedePublicar = computed(() => ['admin', 'editor'].includes(userRole));
+        const esSoloLectura = computed(() => ['revisor', 'auditor'].includes(userRole));
+        const deleteModalTitle = computed(() => esAdmin.value ? 'Confirmar eliminación' : 'Solicitar borrado');
+        const deleteModalBody = computed(() => esAdmin.value
+            ? `¿Está seguro de eliminar este ${singularName.value}? Esta acción no se puede deshacer.`
+            : `Este ${singularName.value} se enviará a moderación. Un administrador aprobará o rechazará el borrado.`);
+        const deleteConfirmLabel = computed(() => esAdmin.value ? 'Eliminar' : 'Solicitar borrado');
+        const fields = computed(() => (config.value?.fields || []).filter(f => !(f.adminOnly && !esAdmin.value)));
         const generalFields = computed(() => fields.value.filter(f => f.tab === 'general'));
         const seoFields = computed(() => fields.value.filter(f => f.tab === 'seo'));
         const fuentesFields = computed(() => fields.value.filter(f => f.tab === 'fuentes'));
@@ -206,9 +220,12 @@ createApp({
             pagination.current_page = page;
             const params = buildSearchParams();
 
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 12000);
             try {
                 const resp = await fetch(`${config.value.endpoint}?${params.toString()}`, {
-                    headers: getJsonHeaders()
+                    headers: getJsonHeaders(),
+                    signal: controller.signal
                 });
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const data = await resp.json();
@@ -222,8 +239,9 @@ createApp({
             } catch (e) {
                 console.error('Fetch error:', e);
                 items.value = [];
-                showMessage('Error al cargar datos', 'danger');
+                showMessage(e.name === 'AbortError' ? 'Tiempo de espera agotado al cargar los datos. Recarga la página.' : 'Error al cargar datos', 'danger');
             }
+            clearTimeout(timeoutId);
             loading.value = false;
             refreshLucideIcons();
         }
@@ -315,13 +333,13 @@ createApp({
                     method: 'DELETE',
                     headers: getJsonHeaders()
                 });
+                const data = resp.ok ? await resp.json() : null;
                 if (resp.ok) {
-                    showMessage('Eliminado correctamente', 'success');
+                    showMessage(data && data.moderacion ? 'Solicitud de borrado enviada. Un administrador la revisará.' : 'Eliminado correctamente', 'success');
                     deleteTarget.value = null;
                     fetchItems(pagination.current_page);
                 } else {
-                    const data = await resp.json();
-                    const errDetail = data.mensaje ? `${data.error}: ${data.mensaje}` : (data.error || 'Error al eliminar');
+                    const errDetail = data && (data.mensaje ? `${data.error}: ${data.mensaje}` : (data.error || 'Error al eliminar'));
                     showMessage(errDetail, 'danger');
                 }
             } catch (e) {
@@ -355,6 +373,8 @@ createApp({
                 formData[f.key] = item[f.key] !== null && item[f.key] !== undefined ? item[f.key] : '';
             });
             imagenPreview.value = item.imagen_destacada_path ? '/uploads/' + item.imagen_destacada_path : '';
+            mediaPreview.value = item.media_destacada_path ? '/uploads/' + item.media_destacada_path : '';
+            mediaPreviewTipo.value = item.media_destacada_tipo === 'video' ? 'video' : (item.media_destacada_path ? 'gif' : '');
             tab.value = 'general';
             view.value = 'form';
             refreshLucideIcons();
@@ -375,6 +395,9 @@ createApp({
                 formData[f.key] = '';
             });
             Object.keys(errors).forEach(k => delete errors[k]);
+            imagenPreview.value = '';
+            mediaPreview.value = '';
+            mediaPreviewTipo.value = '';
             tab.value = 'general';
         }
 
@@ -446,6 +469,9 @@ createApp({
             if (file) {
                 if (key === 'imagen_destacada') {
                     imagenPreview.value = URL.createObjectURL(file);
+                } else if (key === 'media_destacada') {
+                    mediaPreview.value = URL.createObjectURL(file);
+                    mediaPreviewTipo.value = file.type.startsWith('video/') ? 'video' : 'gif';
                 }
             }
         }
@@ -453,7 +479,7 @@ createApp({
         const displayColumns = computed(() => {
             if (!config.value) return [];
             const cols = [];
-            const skip = new Set(['meta_title', 'meta_description', 'slug', 'contenido', 'extracto', 'descripcion', 'fuentes']);
+            const skip = new Set(['meta_title', 'meta_description', 'slug', 'contenido', 'extracto', 'descripcion', 'fuentes', 'interes', 'media_destacada', 'card_embed_url']);
             fields.value.forEach(f => {
                 if (skip.has(f.key)) return;
                 cols.push(f);
@@ -654,8 +680,10 @@ createApp({
             } else {
                 loading.value = false;
             }
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 12000);
             try {
-                const resp = await fetch('/admin/api/categorias?per_page=100', { headers: getJsonHeaders() });
+                const resp = await fetch('/admin/api/categorias?per_page=100', { headers: getJsonHeaders(), signal: controller.signal });
                 if (resp.ok) {
                     const data = await resp.json();
                     categoriaOptions.value = (data.data || []).map(c => ({ value: c.id, label: c.nombre }));
@@ -663,15 +691,17 @@ createApp({
             } catch (e) {
                 console.error('Error cargando categorías:', e);
             }
+            clearTimeout(timeoutId);
         });
 
         return {
             module, loading, view, items, pagination, search, statusFilter,
             editingId, formData, errors, tab, saving, message,
-            deleteTarget, deleteSaving, imagenPreview, hasFileFields,
+            deleteTarget, deleteSaving, imagenPreview, mediaPreview, mediaPreviewTipo, hasFileFields,
             embedModalOpen, embedUrl, embedLoading, embedPreview, embedError, embedProvider,
             config, moduleName, singularName, generalFields, seoFields, fuentesFields, fields,
             availableTabs, statusOptions, displayColumns, pageNumbers,
+            esAdmin, puedePublicar, esSoloLectura, deleteModalTitle, deleteModalBody, deleteConfirmLabel,
             extraFilter, extraFilterLabel, extraFilterOptions,
             fetchItems, saveItem, confirmDelete, cancelDelete, executeDelete,
             publishItem, editItem, createItem, cancelForm, resetForm,
@@ -680,4 +710,9 @@ createApp({
             openEmbedModal, closeEmbedModal, resolveEmbed, insertEmbed
         };
     }
-}).mount('#app');
+});
+
+const appEl = document.getElementById('app');
+if (appEl) {
+    app.mount(appEl);
+}
